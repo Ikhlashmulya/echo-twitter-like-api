@@ -9,8 +9,7 @@ import (
 
 func main() {
 	configuration := config.NewViper()
-	validator := config.NewValidator()
-	echo := config.NewEcho(configuration, validator)
+	echo := config.NewEcho(configuration)
 	userHandler := handler.NewUserHandler()
 
 	echo.POST("/register", userHandler.Register)
