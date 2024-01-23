@@ -5,14 +5,24 @@ import (
 
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/config"
 	handler "github.com/Ikhlashmulya/echo-twitter-like-api/internal/delivery/http"
+	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/repository"
+	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/usecase"
 )
 
 func main() {
 	configuration := config.NewViper()
-	echo := config.NewEcho(configuration)
-	userHandler := handler.NewUserHandler()
+	log := config.NewLogger(configuration)
+	db := config.NewGorm(configuration, log)
 
-	echo.POST("/register", userHandler.Register)
+	userRepository := repository.NewUserRepository()
+	userUsecase := usecase.NewUserUsecase(db, log, configuration, userRepository)
+	userHandler := handler.NewUserHandler(log, userUsecase)
+	
+	echo := config.NewEcho(configuration)
+
+	api := echo.Group("/api")
+	api.POST("/register", userHandler.Register)
+	api.POST("/login", userHandler.Login)
 
 	port := configuration.GetInt("app.port")
 
