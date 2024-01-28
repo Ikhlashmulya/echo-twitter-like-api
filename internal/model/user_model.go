@@ -12,6 +12,12 @@ type UserLoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type FindAllFollowerRequest struct {
+	UserID string `json:"user_id"`
+	Page   int    `json:"-" query:"page"`
+	Size   int    `json:"-" query:"size"`
+}
+
 type UserResponse struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
@@ -20,5 +26,5 @@ type UserResponse struct {
 }
 
 type UserTokenResponse struct {
-	Token     string `json:"token"`
+	Token string `json:"token"`
 }

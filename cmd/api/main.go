@@ -21,8 +21,7 @@ func main() {
 	echo := config.NewEcho(configuration)
 
 	api := echo.Group("/api")
-	api.POST("/register", userHandler.Register)
-	api.POST("/login", userHandler.Login)
+	userHandler.Route(api)
 
 	port := configuration.GetInt("app.port")
 

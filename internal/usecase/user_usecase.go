@@ -90,7 +90,7 @@ func (uc *UserUsecase) Login(ctx context.Context, request *model.UserLoginReques
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
 		uc.log.Warnf("error comparing password user: %v", err)
-		return nil, echo.ErrUnauthorized
+		return nil, echo.NewHTTPError(echo.ErrUnauthorized.Code, "the given password not match")
 	}
 
 	if err := tx.Commit().Error; err != nil {
@@ -112,4 +112,100 @@ func (uc *UserUsecase) Login(ctx context.Context, request *model.UserLoginReques
 	}
 
 	return mapper.ToUserTokenResponse(signedToken), nil
+}
+
+func (uc *UserUsecase) FindById(ctx context.Context, userId string) (*model.UserResponse, error) {
+	tx := uc.db.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	user := new(entity.User)
+	if err := uc.userRepository.FindById(tx, user, userId); err != nil {
+		uc.log.Warnf("error find user by id in database: %v", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, echo.NewHTTPError(echo.ErrNotFound.Code, fmt.Sprintf("user with id: %s not found", userId))
+		}
+		return nil, echo.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		uc.log.Warnf("error commit database: %v", err)
+		return nil, echo.ErrInternalServerError
+	}
+
+	return mapper.ToUserResponse(user), nil
+}
+
+// authId follow userId
+func (uc *UserUsecase) AddFollower(ctx context.Context, userId, authId string) error {
+	tx := uc.db.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	user := new(entity.User)
+	if err := uc.userRepository.FindById(tx, user, authId); err != nil {
+		uc.log.Warnf("error find user by id in database: %v", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return echo.NewHTTPError(echo.ErrNotFound.Code, fmt.Sprintf("user with id: %s not found", userId))
+		}
+		return echo.ErrInternalServerError
+	}
+
+	if err := uc.userRepository.AddFollower(tx, userId, user); err != nil {
+		uc.log.Warnf("error add follower: %v", err)
+		return echo.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		uc.log.Warnf("error commit database: %v", err)
+		return echo.ErrInternalServerError
+	}
+
+	return nil
+}
+
+func (uc *UserUsecase) DeleteFollower(ctx context.Context, userId, authId string) error {
+	tx := uc.db.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	user := new(entity.User)
+	if err := uc.userRepository.FindById(tx, user, authId); err != nil {
+		uc.log.Warnf("error find user by id in database: %v", err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return echo.NewHTTPError(echo.ErrNotFound.Code, fmt.Sprintf("user with id: %s not found", userId))
+		}
+		return echo.ErrInternalServerError
+	}
+
+	if err := uc.userRepository.DeleteFollower(tx, userId, user); err != nil {
+		uc.log.Warnf("error delete follower: %v", err)
+		return echo.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		uc.log.Warnf("error commit database: %v", err)
+		return echo.ErrInternalServerError
+	}
+
+	return nil
+}
+
+func (uc *UserUsecase) FindAllFollower(ctx context.Context, request *model.FindAllFollowerRequest) (responses []model.UserResponse, total int64, err error) {
+	tx := uc.db.WithContext(ctx).Begin()
+	defer tx.Rollback()
+
+	users, total, err := uc.userRepository.FindAllFollower(tx, request)
+	if err != nil {
+		uc.log.Warnf("error findall data follower from database: %v", err)
+		return nil, 0, echo.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		uc.log.Warnf("error commit database: %v", err)
+		return nil, 0, echo.ErrInternalServerError
+	}
+
+	for _, user := range users {
+		responses = append(responses, *mapper.ToUserResponse(&user))
+	}
+
+	return responses, total, err
 }

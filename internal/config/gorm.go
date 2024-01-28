@@ -23,7 +23,7 @@ func NewGorm(config *viper.Viper, log *logrus.Logger) *gorm.DB {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, password, host, port, name)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.New(&logrusWriter{Logger: log}, logger.Config{
+		Logger: logger.New(newLogrusWriter(log), logger.Config{
 			SlowThreshold:             time.Second * 5,
 			Colorful:                  false,
 			IgnoreRecordNotFoundError: true,
@@ -48,6 +48,12 @@ func NewGorm(config *viper.Viper, log *logrus.Logger) *gorm.DB {
 
 type logrusWriter struct {
 	Logger *logrus.Logger
+}
+
+func newLogrusWriter(log *logrus.Logger) *logrusWriter {
+	return &logrusWriter{
+		Logger: log,
+	}
 }
 
 func (lw *logrusWriter) Printf(message string, ars ...any) {

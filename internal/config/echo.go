@@ -5,17 +5,37 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 )
 
 func NewEcho(config *viper.Viper) *echo.Echo {
-	echo := echo.New()
-	echo.Validator = newCustomValidator()
-	echo.Binder = new(ValidationBinder)
-	echo.HTTPErrorHandler = newEchoErrorHandler()
+	e := echo.New()
+	e.Validator = newCustomValidator()
+	e.Binder = new(ValidationBinder)
+	e.HTTPErrorHandler = newEchoErrorHandler()
 
-	return echo
+	e.Use(echojwt.WithConfig(echojwt.Config{
+		SigningKey: []byte(config.GetString("jwt.secret")),
+		Skipper: func(ctx echo.Context) bool {
+			if (ctx.Path() == "/api/user" || ctx.Path() == "/api/user/_login") && ctx.Request().Method == http.MethodPost {
+				return true
+			}
+
+			if ctx.Path() == "/api/user/:userId" && ctx.Request().Method == http.MethodGet {
+				return true
+			}
+
+			if ctx.Path() == "/api/user/:userId/follow" && ctx.Request().Method == http.MethodGet {
+				return true
+			}
+
+			return false
+		},
+	}))
+
+	return e
 }
 
 type ValidationBinder struct{}
@@ -49,7 +69,7 @@ func (cv *CustomValidator) Validate(data any) error {
 }
 
 func newEchoErrorHandler() echo.HTTPErrorHandler {
-	return func(err error, c echo.Context) {
+	return func(err error, ctx echo.Context) {
 		var code int
 		var message any
 
@@ -73,7 +93,7 @@ func newEchoErrorHandler() echo.HTTPErrorHandler {
 			message = errorMessages
 		}
 
-		c.JSON(code, echo.Map{
+		ctx.JSON(code, echo.Map{
 			"errors": message,
 		})
 	}
