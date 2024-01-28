@@ -41,7 +41,7 @@ func (uc *UserUsecase) Register(ctx context.Context, request *model.UserRegister
 	total, err := uc.userRepository.CountById(tx, request.ID)
 	if err != nil {
 		uc.log.Warnf("error count user from database: %v", err)
-		return nil, err
+		return nil, echo.ErrInternalServerError
 	}
 
 	if total > 0 {
@@ -191,6 +191,17 @@ func (uc *UserUsecase) DeleteFollower(ctx context.Context, userId, authId string
 func (uc *UserUsecase) FindAllFollower(ctx context.Context, request *model.FindAllFollowerRequest) (responses []model.UserResponse, total int64, err error) {
 	tx := uc.db.WithContext(ctx).Begin()
 	defer tx.Rollback()
+
+	totalUser, err := uc.userRepository.CountById(tx, request.UserID)
+	if err != nil {
+		uc.log.Warnf("error count user from database: %v", err)
+		return nil, 0, echo.ErrInternalServerError
+	}
+
+	if totalUser == 0 {
+		uc.log.Warnf("user %s not found", request.UserID)
+		return nil, 0, echo.NewHTTPError(echo.ErrNotFound.Code, fmt.Sprintf("user with id: %s not found", request.UserID))
+	}
 
 	users, total, err := uc.userRepository.FindAllFollower(tx, request)
 	if err != nil {
