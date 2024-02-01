@@ -31,6 +31,10 @@ func NewEcho(config *viper.Viper) *echo.Echo {
 				return true
 			}
 
+			if ctx.Path() == "/api/posts/:postId" && ctx.Request().Method == http.MethodGet {
+				return true
+			}
+
 			return false
 		},
 	}))
