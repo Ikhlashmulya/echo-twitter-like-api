@@ -13,7 +13,7 @@ import (
 func NewEcho(config *viper.Viper) *echo.Echo {
 	e := echo.New()
 	e.Validator = newCustomValidator()
-	e.Binder = new(ValidationBinder)
+	e.Binder = new(validationBinder)
 	e.HTTPErrorHandler = newEchoErrorHandler()
 
 	e.Use(echojwt.WithConfig(echojwt.Config{
@@ -38,9 +38,9 @@ func NewEcho(config *viper.Viper) *echo.Echo {
 	return e
 }
 
-type ValidationBinder struct{}
+type validationBinder struct{}
 
-func (vb *ValidationBinder) Bind(data any, ctx echo.Context) error {
+func (vb *validationBinder) Bind(data any, ctx echo.Context) error {
 	defaultBinder := new(echo.DefaultBinder)
 	if err := defaultBinder.Bind(data, ctx); err != nil {
 		return err
@@ -53,15 +53,15 @@ func (vb *ValidationBinder) Bind(data any, ctx echo.Context) error {
 	return nil
 }
 
-type CustomValidator struct {
+type customValidator struct {
 	validate *validator.Validate
 }
 
-func newCustomValidator() *CustomValidator {
-	return &CustomValidator{validate: validator.New()}
+func newCustomValidator() *customValidator {
+	return &customValidator{validate: validator.New()}
 }
 
-func (cv *CustomValidator) Validate(data any) error {
+func (cv *customValidator) Validate(data any) error {
 	if err := cv.validate.Struct(data); err != nil {
 		return err
 	}
