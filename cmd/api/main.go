@@ -17,11 +17,16 @@ func main() {
 	userRepository := repository.NewUserRepository()
 	userUsecase := usecase.NewUserUsecase(db, log, configuration, userRepository)
 	userHandler := handler.NewUserHandler(log, userUsecase)
+
+	postRepository := repository.NewPostRepository()
+	postUsecase := usecase.NewPostUsecase(db, log, postRepository)
+	postHandler := handler.NewPostHandler(log, postUsecase)
 	
 	echo := config.NewEcho(configuration)
 
 	api := echo.Group("/api")
 	userHandler.Route(api)
+	postHandler.Route(api)
 
 	port := configuration.GetInt("app.port")
 

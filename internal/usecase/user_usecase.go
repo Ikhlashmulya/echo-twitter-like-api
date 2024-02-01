@@ -46,7 +46,7 @@ func (uc *UserUsecase) Register(ctx context.Context, request *model.UserRegister
 
 	if total > 0 {
 		uc.log.Warnf("user already exists: %v", err)
-		return nil, echo.NewHTTPError(echo.ErrBadRequest.Code, fmt.Sprintf("user with id: %s already used", request.ID))
+		return nil, echo.NewHTTPError(echo.ErrConflict.Code, fmt.Sprintf("user with id: %s already used", request.ID))
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)

@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/helper"
+	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/delivery/http/util"
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/model"
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/usecase"
 	"github.com/labstack/echo/v4"
@@ -22,13 +22,13 @@ func NewUserHandler(log *logrus.Logger, userUsecase *usecase.UserUsecase) *UserH
 	}
 }
 
-func (h *UserHandler) Route(route *echo.Group) {
-	route.POST("/user", h.Register)
-	route.POST("/user/_login", h.Login)
-	route.GET("/user/:userId", h.FindById)
-	route.POST("/user/:userId/follow", h.AddFollower)
-	route.DELETE("/user/:userId/follow", h.DeleteFollower)
-	route.GET("/user/:userId/follow", h.FindAllFollower)
+func (h *UserHandler) Route(router *echo.Group) {
+	router.POST("/users", h.Register)
+	router.POST("/users/_login", h.Login)
+	router.GET("/users/:userId", h.FindById)
+	router.POST("/users/:userId/follow", h.AddFollower)
+	router.DELETE("/users/:userId/follow", h.DeleteFollower)
+	router.GET("/users/:userId/follow", h.FindAllFollower)
 }
 
 func (h *UserHandler) Register(ctx echo.Context) (err error) {
@@ -76,7 +76,7 @@ func (h *UserHandler) FindById(ctx echo.Context) error {
 }
 
 func (h *UserHandler) AddFollower(ctx echo.Context) error {
-	authId := helper.GetAuthId(ctx)
+	authId := util.GetAuthId(ctx)
 
 	userId := ctx.Param("userId")
 
@@ -89,7 +89,7 @@ func (h *UserHandler) AddFollower(ctx echo.Context) error {
 }
 
 func (h *UserHandler) DeleteFollower(ctx echo.Context) error {
-	authId := helper.GetAuthId(ctx)
+	authId := util.GetAuthId(ctx)
 
 	userId := ctx.Param("userId")
 

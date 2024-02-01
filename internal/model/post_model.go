@@ -11,6 +11,11 @@ type PostUpdateRequest struct {
 	Content string `json:"content" validate:"required"`
 }
 
+type PostDeleteRequest struct {
+	ID     string
+	UserID string
+}
+
 type PostResponse struct {
 	ID        string `json:"id"`
 	UserID    string `json:"author"`
