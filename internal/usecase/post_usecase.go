@@ -83,7 +83,7 @@ func (uc *PostUsecase) Update(ctx context.Context, request *model.PostUpdateRequ
 	return mapper.ToPostResponse(post), nil
 }
 
-func (uc *PostUsecase) Delete(ctx context.Context, request *model.PostDeleteRequest) (error) {
+func (uc *PostUsecase) Delete(ctx context.Context, request *model.PostDeleteRequest) error {
 	tx := uc.db.Begin()
 	defer tx.Rollback()
 
@@ -133,4 +133,26 @@ func (uc *PostUsecase) FindById(ctx context.Context, postId string) (*model.Post
 	}
 
 	return mapper.ToPostResponse(post), nil
+}
+
+func (uc *PostUsecase) FindByUserId(ctx context.Context, request *model.PostFindByUserIdRequest) (responses []model.PostResponse, total int64, err error) {
+	tx := uc.db.Begin()
+	defer tx.Rollback()
+
+	posts, total, err := uc.postRepository.FindByUserId(tx, request)
+	if err != nil {
+		uc.log.Warnf("error find user by id from database: %v", err)
+		return nil, 0, echo.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		uc.log.Warnf("error commit database: %v", err)
+		return nil, 0, echo.ErrInternalServerError
+	}
+
+	for _, post := range posts {
+		responses = append(responses, *mapper.ToPostResponse(&post))
+	}
+
+	return responses, total, nil
 }

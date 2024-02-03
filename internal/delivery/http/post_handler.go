@@ -27,6 +27,7 @@ func (h *PostHandler) Route(router *echo.Group) {
 	router.GET("/posts/:postId", h.FindById)
 	router.PUT("/posts/:postId", h.Update)
 	router.DELETE("/posts/:postId", h.Delete)
+	router.GET("/users/:userId/posts", h.FindByUserId)
 }
 
 func (h *PostHandler) Create(ctx echo.Context) error {
@@ -88,4 +89,37 @@ func (h *PostHandler) FindById(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, &model.WebResponse[*model.PostResponse]{Data: response})
+}
+
+func (h *PostHandler) FindByUserId(ctx echo.Context) error {
+	request := new(model.PostFindByUserIdRequest)
+	if err := ctx.Bind(request); err != nil {
+		h.log.Warnf("error binding : %v", err)
+		return err
+	}
+
+	request.UserID = ctx.Param("userId")
+
+	if request.Page == 0 {
+		request.Page = 1
+	}
+
+	if request.Size == 0 {
+		request.Size = 5
+	}
+
+	responses, total, err := h.postUsecase.FindByUserId(ctx.Request().Context(), request)
+	if err != nil {
+		h.log.Warnf("error find post by user id: %v", err)
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, &model.WebResponse[[]model.PostResponse]{
+		Data: responses,
+		Paging: &model.Paging{
+			Page:  request.Page,
+			Size:  request.Size,
+			Total: total,
+		},
+	})
 }

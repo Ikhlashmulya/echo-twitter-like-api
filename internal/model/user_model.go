@@ -12,7 +12,7 @@ type UserLoginRequest struct {
 	Password string `json:"password" validate:"required"`
 }
 
-type FindAllFollowerRequest struct {
+type UserFindAllFollowingRequest struct {
 	UserID string `json:"user_id"`
 	Page   int    `json:"-" query:"page"`
 	Size   int    `json:"-" query:"size"`

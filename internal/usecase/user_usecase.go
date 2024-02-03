@@ -136,12 +136,12 @@ func (uc *UserUsecase) FindById(ctx context.Context, userId string) (*model.User
 }
 
 // authId follow userId
-func (uc *UserUsecase) AddFollower(ctx context.Context, userId, authId string) error {
+func (uc *UserUsecase) AddFollowing(ctx context.Context, userId, authId string) error {
 	tx := uc.db.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	user := new(entity.User)
-	if err := uc.userRepository.FindById(tx, user, authId); err != nil {
+	if err := uc.userRepository.FindById(tx, user, userId); err != nil {
 		uc.log.Warnf("error find user by id in database: %v", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return echo.NewHTTPError(echo.ErrNotFound.Code, fmt.Sprintf("user with id: %s not found", userId))
@@ -149,8 +149,8 @@ func (uc *UserUsecase) AddFollower(ctx context.Context, userId, authId string) e
 		return echo.ErrInternalServerError
 	}
 
-	if err := uc.userRepository.AddFollower(tx, userId, user); err != nil {
-		uc.log.Warnf("error add follower: %v", err)
+	if err := uc.userRepository.AddFollowing(tx, authId, user); err != nil {
+		uc.log.Warnf("error add following: %v", err)
 		return echo.ErrInternalServerError
 	}
 
@@ -162,12 +162,12 @@ func (uc *UserUsecase) AddFollower(ctx context.Context, userId, authId string) e
 	return nil
 }
 
-func (uc *UserUsecase) DeleteFollower(ctx context.Context, userId, authId string) error {
+func (uc *UserUsecase) DeleteFollowing(ctx context.Context, userId, authId string) error {
 	tx := uc.db.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	user := new(entity.User)
-	if err := uc.userRepository.FindById(tx, user, authId); err != nil {
+	if err := uc.userRepository.FindById(tx, user, userId); err != nil {
 		uc.log.Warnf("error find user by id in database: %v", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return echo.NewHTTPError(echo.ErrNotFound.Code, fmt.Sprintf("user with id: %s not found", userId))
@@ -175,8 +175,8 @@ func (uc *UserUsecase) DeleteFollower(ctx context.Context, userId, authId string
 		return echo.ErrInternalServerError
 	}
 
-	if err := uc.userRepository.DeleteFollower(tx, userId, user); err != nil {
-		uc.log.Warnf("error delete follower: %v", err)
+	if err := uc.userRepository.DeleteFollowing(tx, authId, user); err != nil {
+		uc.log.Warnf("error delete following: %v", err)
 		return echo.ErrInternalServerError
 	}
 
@@ -188,7 +188,7 @@ func (uc *UserUsecase) DeleteFollower(ctx context.Context, userId, authId string
 	return nil
 }
 
-func (uc *UserUsecase) FindAllFollower(ctx context.Context, request *model.FindAllFollowerRequest) (responses []model.UserResponse, total int64, err error) {
+func (uc *UserUsecase) FindAllFollowing(ctx context.Context, request *model.UserFindAllFollowingRequest) (responses []model.UserResponse, total int64, err error) {
 	tx := uc.db.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
@@ -203,9 +203,9 @@ func (uc *UserUsecase) FindAllFollower(ctx context.Context, request *model.FindA
 		return nil, 0, echo.NewHTTPError(echo.ErrNotFound.Code, fmt.Sprintf("user with id: %s not found", request.UserID))
 	}
 
-	users, total, err := uc.userRepository.FindAllFollower(tx, request)
+	users, total, err := uc.userRepository.FindAllFollowing(tx, request)
 	if err != nil {
-		uc.log.Warnf("error findall data follower from database: %v", err)
+		uc.log.Warnf("error findall data following from database: %v", err)
 		return nil, 0, echo.ErrInternalServerError
 	}
 

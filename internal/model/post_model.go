@@ -16,9 +16,15 @@ type PostDeleteRequest struct {
 	UserID string
 }
 
+type PostFindByUserIdRequest struct {
+	UserID string 
+	Page   int `query:"page"`
+	Size   int `query:"size"`
+}
+
 type PostResponse struct {
 	ID        string `json:"id"`
-	UserID    string `json:"author"`
+	UserID    string `json:"user"`
 	Content   string `json:"content"`
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`

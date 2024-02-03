@@ -26,9 +26,9 @@ func (h *UserHandler) Route(router *echo.Group) {
 	router.POST("/users", h.Register)
 	router.POST("/users/_login", h.Login)
 	router.GET("/users/:userId", h.FindById)
-	router.POST("/users/:userId/follow", h.AddFollower)
-	router.DELETE("/users/:userId/follow", h.DeleteFollower)
-	router.GET("/users/:userId/follow", h.FindAllFollower)
+	router.POST("/users/:userId/follow", h.AddFollowing)
+	router.DELETE("/users/:userId/follow", h.DeleteFollowing)
+	router.GET("/users/:userId/follow", h.FindAllFollowing)
 }
 
 func (h *UserHandler) Register(ctx echo.Context) (err error) {
@@ -75,12 +75,12 @@ func (h *UserHandler) FindById(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, &model.WebResponse[*model.UserResponse]{Data: response})
 }
 
-func (h *UserHandler) AddFollower(ctx echo.Context) error {
+func (h *UserHandler) AddFollowing(ctx echo.Context) error {
 	authId := util.GetAuthId(ctx)
 
 	userId := ctx.Param("userId")
 
-	if err := h.userUsecase.AddFollower(ctx.Request().Context(), userId, authId); err != nil {
+	if err := h.userUsecase.AddFollowing(ctx.Request().Context(), userId, authId); err != nil {
 		h.log.Warnf("error add follower: %v", err)
 		return err
 	}
@@ -88,12 +88,12 @@ func (h *UserHandler) AddFollower(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, &model.WebResponse[string]{Data: "OK"})
 }
 
-func (h *UserHandler) DeleteFollower(ctx echo.Context) error {
+func (h *UserHandler) DeleteFollowing(ctx echo.Context) error {
 	authId := util.GetAuthId(ctx)
 
 	userId := ctx.Param("userId")
 
-	if err := h.userUsecase.DeleteFollower(ctx.Request().Context(), userId, authId); err != nil {
+	if err := h.userUsecase.DeleteFollowing(ctx.Request().Context(), userId, authId); err != nil {
 		h.log.Warnf("error delete follower: %v", err)
 		return err
 	}
@@ -101,8 +101,8 @@ func (h *UserHandler) DeleteFollower(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, &model.WebResponse[string]{Data: "OK"})
 }
 
-func (h *UserHandler) FindAllFollower(ctx echo.Context) error {
-	request := new(model.FindAllFollowerRequest)
+func (h *UserHandler) FindAllFollowing(ctx echo.Context) error {
+	request := new(model.UserFindAllFollowingRequest)
 	if err := ctx.Bind(request); err != nil {
 		h.log.Warnf("error binding request: %v", err)
 		return err
@@ -118,7 +118,7 @@ func (h *UserHandler) FindAllFollower(ctx echo.Context) error {
 		request.Size = 5
 	}
 
-	responses, total, err := h.userUsecase.FindAllFollower(ctx.Request().Context(), request)
+	responses, total, err := h.userUsecase.FindAllFollowing(ctx.Request().Context(), request)
 	if err != nil {
 		h.log.Warnf("error find all follower: %v", err)
 		return err

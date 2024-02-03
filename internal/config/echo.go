@@ -19,19 +19,23 @@ func NewEcho(config *viper.Viper) *echo.Echo {
 	e.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey: []byte(config.GetString("jwt.secret")),
 		Skipper: func(ctx echo.Context) bool {
-			if (ctx.Path() == "/api/user" || ctx.Path() == "/api/user/_login") && ctx.Request().Method == http.MethodPost {
+			if (ctx.Path() == "/api/users" || ctx.Path() == "/api/users/_login") && ctx.Request().Method == http.MethodPost {
 				return true
 			}
 
-			if ctx.Path() == "/api/user/:userId" && ctx.Request().Method == http.MethodGet {
+			if ctx.Path() == "/api/users/:userId" && ctx.Request().Method == http.MethodGet {
 				return true
 			}
 
-			if ctx.Path() == "/api/user/:userId/follow" && ctx.Request().Method == http.MethodGet {
+			if ctx.Path() == "/api/users/:userId/follow" && ctx.Request().Method == http.MethodGet {
 				return true
 			}
 
 			if ctx.Path() == "/api/posts/:postId" && ctx.Request().Method == http.MethodGet {
+				return true
+			}
+
+			if ctx.Path() == "/api/users/:userId/posts" && ctx.Request().Method == http.MethodGet {
 				return true
 			}
 
