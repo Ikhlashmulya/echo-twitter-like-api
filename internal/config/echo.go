@@ -47,6 +47,8 @@ func NewEcho(config *viper.Viper) *echo.Echo {
 		},
 	}))
 
+	e.Static("/static", "web/assets")
+
 	return e
 }
 

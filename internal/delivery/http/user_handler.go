@@ -1,7 +1,10 @@
 package http
 
 import (
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/delivery/http/util"
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/model"
@@ -29,6 +32,7 @@ func (h *UserHandler) Route(router *echo.Group) {
 	router.POST("/users/:userId/follow", h.AddFollowing)
 	router.DELETE("/users/:userId/follow", h.DeleteFollowing)
 	router.GET("/users/:userId/follow", h.FindAllFollowing)
+	router.POST("/users/_upload", h.UploadPhoto)
 }
 
 func (h *UserHandler) Register(ctx echo.Context) (err error) {
@@ -131,5 +135,44 @@ func (h *UserHandler) FindAllFollowing(ctx echo.Context) error {
 			Size:  request.Size,
 			Total: total,
 		},
+	})
+}
+
+func (h *UserHandler) UploadPhoto(ctx echo.Context) error {
+	userId := util.GetAuthId(ctx)
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return err
+	}
+
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	fileName := fmt.Sprintf("%s-%s", userId, file.Filename)
+
+	dst, err := os.Create(fmt.Sprintf("web/assets/%s", fileName))
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+
+	pathPhoto := fmt.Sprintf("/static/%s", fileName)
+
+	response, err := h.userUsecase.UpdatePathPhoto(ctx.Request().Context(), pathPhoto, userId)
+	if err != nil {
+		h.log.Warnf("error update path photo: %v", err)
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, &model.WebResponse[*model.UserResponse]{
+		Data: response,
 	})
 }
