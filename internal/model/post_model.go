@@ -22,6 +22,12 @@ type PostFindByUserIdRequest struct {
 	Size   int `query:"size"`
 }
 
+type PostFindByFollowingUserRequest struct {
+	UserID string
+	Page   int `query:"page"`
+	Size   int `query:"size"`
+}
+
 type PostResponse struct {
 	ID        string `json:"id"`
 	UserID    string `json:"user"`

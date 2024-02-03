@@ -156,3 +156,25 @@ func (uc *PostUsecase) FindByUserId(ctx context.Context, request *model.PostFind
 
 	return responses, total, nil
 }
+
+func (uc *PostUsecase) FindByFollowingUser(ctx context.Context, request *model.PostFindByFollowingUserRequest) (responses []model.PostResponse, total int64, err error) {
+	tx := uc.db.Begin()
+	defer tx.Rollback()
+
+	posts, total, err := uc.postRepository.FindByFollowingUser(tx, request)
+	if err != nil {
+		uc.log.Warnf("error find by following user: %v",err)
+		return nil, 0, echo.ErrInternalServerError
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		uc.log.Warnf("error commit database: %v", err)
+		return nil, 0,echo.ErrInternalServerError
+	}
+
+	for _, post := range posts {
+		responses = append(responses, *mapper.ToPostResponse(&post))
+	}
+
+	return
+}

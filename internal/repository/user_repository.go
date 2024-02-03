@@ -19,15 +19,15 @@ func (r *UserRepository) AddFollowing(db *gorm.DB, authId string, user *entity.U
 }
 
 func (r *UserRepository) DeleteFollowing(db *gorm.DB, authId string, user *entity.User) error {
-	return db.Model(&entity.User{ID: authId}).Association("Followers").Delete(user)
+	return db.Model(&entity.User{ID: authId}).Association("Following").Delete(user)
 }
 
 func (r *UserRepository) FindAllFollowing(db *gorm.DB, request *model.UserFindAllFollowingRequest) ([]entity.User, int64, error) {
 	var followers []entity.User
-	if err := db.Model(&entity.User{ID: request.UserID}).Limit(request.Size).Offset((request.Page - 1) * request.Size).Association("Followers").Find(&followers); err != nil {
+	if err := db.Model(&entity.User{ID: request.UserID}).Limit(request.Size).Offset((request.Page - 1) * request.Size).Association("Following").Find(&followers); err != nil {
 		return nil, 0, err
 	}
 
-	total := db.Model(&entity.User{ID: request.UserID}).Association("Followers").Count()
+	total := db.Model(&entity.User{ID: request.UserID}).Association("Following").Count()
 	return followers, total, nil
 }

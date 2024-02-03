@@ -27,3 +27,13 @@ func (r *PostRepository) FindByUserId(tx *gorm.DB, request *model.PostFindByUser
 
 	return posts, total, nil
 }
+
+func (r *PostRepository) FindByFollowingUser(tx *gorm.DB, request *model.PostFindByFollowingUserRequest) ([]entity.Post, int64, error) {
+	var results []entity.Post
+	tx.Raw("SELECT id, user_id, content, created_at, updated_at FROM posts WHERE user_id IN (SELECT following_id FROM user_followers WHERE user_id = ?) ORDER BY created_at DESC LIMIT ? OFFSET ?", request.UserID, request.Size, (request.Page-1)*request.Size).Scan(&results)
+
+	var total int64
+	tx.Raw("SELECT count(id) FROM posts WHERE user_id IN (SELECT following_id FROM user_followers WHERE user_id = ?) ORDER BY max(created_at) DESC", request.UserID).Scan(&total)
+
+	return results, total, nil
+}
