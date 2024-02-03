@@ -152,6 +152,17 @@ func (h *UserHandler) UploadPhoto(ctx echo.Context) error {
 	}
 	defer src.Close()
 
+	buff := make([]byte, 512)
+	if _, err := src.Read(buff); err != nil {
+		return err
+	}
+
+	h.log.Debug(http.DetectContentType(buff))
+
+	if http.DetectContentType(buff) != "image/jpeg" {
+		return echo.NewHTTPError(echo.ErrBadRequest.Code, "file must be image/jpeg")
+	}
+
 	fileName := fmt.Sprintf("%s-%s", userId, file.Filename)
 
 	dst, err := os.Create(fmt.Sprintf("web/assets/%s", fileName))
