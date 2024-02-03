@@ -1,0 +1,71 @@
+POST http://localhost:8000/api/users HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "johndoe@mail.com",
+    "id": "johndoe",
+    "password": "123"
+}
+
+###
+
+POST http://localhost:8000/api/users/_login HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": "johndoe",
+    "password": "123"
+}
+
+###
+
+GET http://localhost:8000/api/users/johndoe HTTP/1.1
+
+###
+
+POST http://localhost:8000/api/users/ikhlashmulya/follow HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY5OTAzOTcsImlkIjoiam9obmRvZSJ9.3PL8eEHz18Nwg_j_gQ8UoTJqZwyGjoE2I2Hn0NqBAtw
+
+###
+
+DELETE http://localhost:8000/api/users/ikhlashmulya/follow HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY5OTAzOTcsImlkIjoiam9obmRvZSJ9.3PL8eEHz18Nwg_j_gQ8UoTJqZwyGjoE2I2Hn0NqBAtw
+
+###
+
+GET http://localhost:8000/api/users/ikhlashmulya/follow HTTP/1.1
+
+###
+
+POST http://localhost:8000/api/posts HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY5OTAzOTcsImlkIjoiam9obmRvZSJ9.3PL8eEHz18Nwg_j_gQ8UoTJqZwyGjoE2I2Hn0NqBAtw
+Content-Type: application/json
+
+{
+    "content": "test post!!!"
+}
+
+###
+
+PUT http://localhost:8000/api/posts/2391d59f-62b0-4264-adea-3fa4f1406553 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY5OTAzOTcsImlkIjoiam9obmRvZSJ9.3PL8eEHz18Nwg_j_gQ8UoTJqZwyGjoE2I2Hn0NqBAtw
+Content-Type: application/json
+
+{
+    "content": "test post!!! edited"
+}
+
+###
+
+DELETE http://localhost:8000/api/posts/2391d59f-62b0-4264-adea-3fa4f1406553 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY5OTAzOTcsImlkIjoiam9obmRvZSJ9.3PL8eEHz18Nwg_j_gQ8UoTJqZwyGjoE2I2Hn0NqBAtw
+
+###
+
+GET http://localhost:8000/api/users/ikhlashmulya/posts HTTP/1.1
+
+###
+
+GET http://localhost:8000/api/feed HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY5OTAzOTcsImlkIjoiam9obmRvZSJ9.3PL8eEHz18Nwg_j_gQ8UoTJqZwyGjoE2I2Hn0NqBAtw
