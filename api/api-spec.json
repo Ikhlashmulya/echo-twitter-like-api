@@ -1,0 +1,623 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "contact": {
+            "name": "Ikhlash Mulyanurahman",
+            "email": "nurahmanmulya@gmail.com",
+            "url": "https://ikhlashmulya.is-a.dev/"
+        },
+        "title": "twitter-like API",
+        "version": "1"
+    },
+    "paths": {
+        "/users": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/userResponse"
+                    }
+                }
+            }
+        },
+        "/users/_login": {
+            "post": {
+                "tags": ["user"],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/tokenResponse"
+                    }
+                }
+            }
+        },
+        "/users/:userId": {
+            "get": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/userId"
+                    }
+                ],
+                "tags": ["user"],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/userResponse"
+                    }
+                }
+            }
+        },
+        "/users/:userId/follow": {
+            "post": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/userId"
+                    }
+                ],
+                "tags": ["user"],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/okResponse"
+                    }
+                }
+            },
+            "delete": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/userId"
+                    }
+                ],
+                "tags": ["user"],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/okResponse"
+                    }
+                }
+            },
+            "get": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/userId"
+                    }
+                ],
+                "tags": ["user"],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/userResponses"
+                    }
+                }
+            }
+        },
+        "/users/_upload": {
+            "post": {
+                "tags": ["user"],
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/userResponse"
+                    }
+                }
+            }
+        },
+        "/posts": {
+            "post": {
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    }
+                ],
+                "tags": ["post"],
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/postRequest"
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/postResponse"
+                    }
+                }
+            }
+        },
+        "/posts/:postId": {
+            "put": {
+                "tags": ["post"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/postId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    }
+                ],
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/postRequest"
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/postResponse"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["post"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/postId"
+                    },
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/okResponse"
+                    }
+                }
+            },
+            "get": {
+                "tags": ["post"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/postId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/postResponse"
+                    }
+                }
+            }
+        },
+        "/users/:userId/posts": {
+            "get": {
+                "tags": ["post"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/userId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/postResponses"
+                    }
+                }
+            }
+        },
+        "/feed": {
+            "get": {
+                "tags": ["post"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/postResponses"
+                    }
+                }
+            }
+        },
+        "/posts/:postId/comments": {
+            "post": {
+                "tags": ["comment"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    },
+                    {
+                        "$ref": "#/components/parameters/postId"
+                    }
+                ],
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/commentRequest"
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/commentResponse"
+                    }
+                }
+            },
+            "get": {
+                "tags": ["comment"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    },
+                    {
+                        "$ref": "#/components/parameters/postId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/commentResponses"
+                    }
+                }
+            }
+        },
+        "/comments/:commentId": {
+            "put": {
+                "tags": ["comment"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    },
+                    {
+                        "$ref": "#/components/parameters/commentId"
+                    }
+                ],
+                "requestBody": {
+                    "$ref": "#/components/requestBodies/commentRequest"
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/commentResponse"
+                    }
+                }
+            },
+            "delete": {
+                "tags": ["comment"],
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/auth"
+                    },
+                    {
+                        "$ref": "#/components/parameters/commentId"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/commentResponse"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "user": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "photo_profile": {
+                        "type": "string"
+                    }
+                }
+            },
+            "paging": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "number"
+                    },
+                    "size": {
+                        "type": "number"
+                    },
+                    "total": {
+                        "type": "string"
+                    }
+                }
+            },
+            "post": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "number"
+                    },
+                    "updated_at": {
+                        "type": "number"
+                    }
+                }
+            },
+            "comment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "user": {
+                        "type": "string"
+                    },
+                    "reply": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "number"
+                    },
+                    "updated_at": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "responses": {
+            "userResponse": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/components/schemas/user"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "user data response"
+            },
+            "userResponses": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/user"
+                                    }
+                                },
+                                "paging": {
+                                    "$ref": "#/components/schemas/paging"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "response many users"
+            },
+            "tokenResponse": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "token": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "token response"
+            },
+            "okResponse": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "example": {
+                            "data": "OK"
+                        }
+                    }
+                },
+                "description": "ok response"
+            },
+            "postResponse": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/components/schemas/post"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "post data response"
+            },
+            "postResponses": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/post"
+                                    }
+                                },
+                                "paging": {
+                                    "$ref": "#/components/schemas/paging"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "post many data responses"
+            },
+            "commentResponse": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "$ref": "#/components/schemas/comment"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "comment data response"
+            },
+            "commentResponses": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/comment"
+                                    }
+                                },
+                                "paging": {
+                                    "$ref": "#/components/schemas/paging"
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "comment many data responses"
+            }
+        },
+        "requestBodies": {
+            "postRequest": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "content": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "commentRequest": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "reply": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "auth": {
+                "in": "header",
+                "name": "Authorization",
+                "schema": {
+                    "type": "string"
+                },
+                "description": "Bearer token",
+                "example": {
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY5OTQ2NjMsImlkIjoiam9obmRvZSJ9.ptMFtXLRuA-hxLeuV1e6ZcOGxVdfcULqBr5XzvC4brk"
+                },
+                "required": true
+            },
+            "postId": {
+                "in": "path",
+                "name": "post id",
+                "description": "post id",
+                "schema": {
+                    "type": "string"
+                },
+                "required": true
+            },
+            "userId": {
+                "in": "path",
+                "name": "user id",
+                "description": "user id",
+                "schema": {
+                    "type": "string"
+                },
+                "required": true
+            },
+            "commentId": {
+                "in": "path",
+                "name": "comment id",
+                "description": "comment id",
+                "schema": {
+                    "type": "string"
+                },
+                "required": true
+            }
+        }
+    }
+}

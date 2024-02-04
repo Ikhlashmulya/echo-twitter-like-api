@@ -1,5 +1,24 @@
 # Twitter-like API
-this is my practice using echo framework, creating twitter-like API from echo documentation, maybe I will continue to develop this, its purpose for my practice.
+this is my practice project golang using echo framework, creating REST API social media like twitter.
 
-# References
-- [https://echo.labstack.com/docs/cookbook/twitter](https://echo.labstack.com/docs/cookbook/twitter)
+# Install
+
+clone repository
+```
+git clone git@github.com:Ikhlashmulya/echo-twitter-like-api.git
+```
+
+setup configuration
+```
+mv config.example.json config.json
+```
+
+migrate
+```
+go run cmd/migrate/main.go
+```
+
+running
+```
+go run cmd/api/main.go
+```
