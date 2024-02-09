@@ -4,6 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"os"
+	"path"
 	"time"
 
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/entity"
@@ -11,6 +15,7 @@ import (
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/model/mapper"
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/repository"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -222,9 +227,38 @@ func (uc *UserUsecase) FindAllFollowing(ctx context.Context, request *model.User
 	return responses, total, err
 }
 
-func (uc *UserUsecase) UpdatePathPhoto(ctx context.Context, path string, userId string) (*model.UserResponse, error) {
+func (uc *UserUsecase) UpdatePhoto(ctx context.Context, file *multipart.FileHeader, userId string) (*model.UserResponse, error) {
 	tx := uc.db.WithContext(ctx).Begin()
 	defer tx.Rollback()
+
+	src, err := file.Open()
+	if err != nil {
+		uc.log.Warnf("error open file: %v", err)
+		return nil, echo.ErrInternalServerError
+	}
+	defer src.Close()
+
+	extFile := path.Ext(file.Filename)
+
+	if extFile != ".jpg" && extFile != ".jpeg" {
+		return nil, echo.NewHTTPError(echo.ErrBadRequest.Code, "file must be image/jpeg")
+	}
+
+	fileName := fmt.Sprintf("%s-%s%s", userId, uuid.NewString(), extFile)
+
+	dst, err := os.Create(fmt.Sprintf("web/assets/%s", fileName))
+	if err != nil {
+		uc.log.Warnf("error create file: %v", err)
+		return nil, echo.ErrInternalServerError
+	}
+	defer dst.Close()
+
+	if _, err = io.Copy(dst, src); err != nil {
+		uc.log.Warnf("error copy file: %v", err)
+		return nil, echo.ErrInternalServerError
+	}
+
+	pathPhoto := fmt.Sprintf("/static/%s", fileName)
 
 	user := new(entity.User)
 	if err := uc.userRepository.FindById(tx, user, userId); err != nil {
@@ -235,7 +269,7 @@ func (uc *UserUsecase) UpdatePathPhoto(ctx context.Context, path string, userId 
 		return nil, echo.ErrInternalServerError
 	}
 
-	user.PhotoProfile = path
+	user.PhotoProfile = pathPhoto
 
 	if err := uc.userRepository.Update(tx, user); err != nil {
 		uc.log.Warnf("error updating: %v", err)

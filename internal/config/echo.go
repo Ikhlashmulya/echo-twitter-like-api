@@ -16,6 +16,8 @@ func NewEcho(config *viper.Viper) *echo.Echo {
 	e.Binder = new(validationBinder)
 	e.HTTPErrorHandler = newEchoErrorHandler()
 
+	e.Static("/static", "web/assets")
+
 	e.Use(echojwt.WithConfig(echojwt.Config{
 		SigningKey: []byte(config.GetString("jwt.secret")),
 		Skipper: func(ctx echo.Context) bool {
@@ -43,11 +45,13 @@ func NewEcho(config *viper.Viper) *echo.Echo {
 				return true
 			}
 
+			if ctx.Path() == "/static*" && ctx.Request().Method == http.MethodGet {
+				return true
+			}
+
 			return false
 		},
 	}))
-
-	e.Static("/static", "web/assets")
 
 	return e
 }

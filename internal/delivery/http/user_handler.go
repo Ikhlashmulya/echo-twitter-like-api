@@ -1,10 +1,7 @@
 package http
 
 import (
-	"fmt"
-	"io"
 	"net/http"
-	"os"
 
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/delivery/http/util"
 	"github.com/Ikhlashmulya/echo-twitter-like-api/internal/model"
@@ -146,40 +143,9 @@ func (h *UserHandler) UploadPhoto(ctx echo.Context) error {
 		return err
 	}
 
-	src, err := file.Open()
+	response, err := h.userUsecase.UpdatePhoto(ctx.Request().Context(), file, userId)
 	if err != nil {
-		return err
-	}
-	defer src.Close()
-
-	buff := make([]byte, 512)
-	if _, err := src.Read(buff); err != nil {
-		return err
-	}
-
-	h.log.Debug(http.DetectContentType(buff))
-
-	if http.DetectContentType(buff) != "image/jpeg" {
-		return echo.NewHTTPError(echo.ErrBadRequest.Code, "file must be image/jpeg")
-	}
-
-	fileName := fmt.Sprintf("%s-%s", userId, file.Filename)
-
-	dst, err := os.Create(fmt.Sprintf("web/assets/%s", fileName))
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	if _, err = io.Copy(dst, src); err != nil {
-		return err
-	}
-
-	pathPhoto := fmt.Sprintf("/static/%s", fileName)
-
-	response, err := h.userUsecase.UpdatePathPhoto(ctx.Request().Context(), pathPhoto, userId)
-	if err != nil {
-		h.log.Warnf("error update path photo: %v", err)
+		h.log.Warnf("error update photo: %v", err)
 		return err
 	}
 
